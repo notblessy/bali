@@ -1,0 +1,11 @@
+margiang utama
+
+teges tetujon ne "batur"
+
+yen tetujon ne "pasih":
+  pesuang("gas ke canggu mai")
+tiosan yen tetujon ne "batur":
+  pesuang("kle joh sajan")
+tiosan:
+  pesuang("nah jumah gen be")
+suud
