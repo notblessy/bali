@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/notblessy/compiler"
+	"github.com/notblessy/bali/compiler"
 )
 
 func main() {
