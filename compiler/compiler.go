@@ -27,7 +27,7 @@ func GetCompilerCommand(lines []string) []CompilerCommand {
 
 func ToGolang(commands []CompilerCommand) string {
 	var goCommands string
-	isOpenGroup := true
+	isOpenGroup := false
 	hasEntry := false
 
 	for _, cmd := range commands {

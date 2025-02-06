@@ -161,7 +161,7 @@ func Print(msg string) *CompilerCommand {
 	}
 
 	// Construct Go print statement using fmt.Println for correct output
-	goLog := fmt.Sprintf("print%s", match[1])
+	goLog := fmt.Sprintf(`print%s`, match[1])
 
 	// Return the compiled command
 	return &CompilerCommand{
