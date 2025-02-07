@@ -89,50 +89,73 @@ func If(msg string) *CompilerCommand {
 		return ElseIf(msg)
 	}
 
-	// Define the format pattern to match:
-	// "yen urutan ne <value>:", "yen urutan ne sing <value>:",
-	// "yen urutan gedenan ken <value>:", "yen urutan cenikan ken <value>:"
-	format := regexp.MustCompile(`yen ([a-zA-Z0-9_]+) (ne|ne sing|gedenan ken|cenikan ken) ([^\n]+)`)
+	format := regexp.MustCompile(`yen ([^:]+):`)
 	match := format.FindStringSubmatch(msg)
 	if match == nil {
 		return nil
 	}
 
-	// Determine the operator based on the match
-	operator := mapComparable[match[2]]
+	// Extract and parse condition expression
+	condition := strings.TrimSpace(match[1])
 
-	// Apply value transformation to the third part (value)
-	conditionValue := strings.TrimSuffix(valueTransform(match[3]), ":")
+	// Handle logical operators
+	condition = strings.ReplaceAll(condition, "lan", "&&")
+	condition = strings.ReplaceAll(condition, "utawi", "||")
 
-	// Construct Go if condition
-	goIf := fmt.Sprintf("if %s %s %s", match[1], operator, conditionValue)
+	// Transform each part of the condition if needed
+	parts := regexp.MustCompile(`([a-zA-Z0-9_]+) (ne|ne sing|gedenan ken|cenikan ken) ([^\s]+)`)
+	condition = parts.ReplaceAllStringFunc(condition, func(part string) string {
+		matches := parts.FindStringSubmatch(part)
+		if matches == nil {
+			return part
+		}
+		varName, comparator, value := matches[1], matches[2], matches[3]
+		operator := mapComparable[comparator]
+		return fmt.Sprintf("%s %s %s", varName, operator, valueTransform(value))
+	})
+
+	// Construct the Go if condition
+	goIf := fmt.Sprintf("if %s", condition)
+
 	return &CompilerCommand{
 		Syntax:    goIf,
 		OpenGroup: true,
 	}
 }
 
-// ElseIf parses the input string and returns a Go if condition
+// ElseIf parses the input string and returns a Go else if condition
 func ElseIf(msg string) *CompilerCommand {
 	// Trim any leading or trailing spaces
 	msg = strings.TrimSpace(msg)
 
 	// Adjusting the format to capture the phrase "tiosan yen"
-	format := regexp.MustCompile(`tiosan yen ([a-zA-Z0-9]+) ([a-zA-Z ]+) ([^\[\]\(\)\n]+)`)
+	format := regexp.MustCompile(`tiosan yen ([^:]+):`)
 	match := format.FindStringSubmatch(msg)
 	if match == nil {
 		return nil
 	}
 
-	// Transform the second captured group (operator) using mapCompare
-	operator := mapComparable[match[2]]
-	if operator == "" {
-		// If no operator found, just return without transformation
-		operator = match[2]
-	}
+	// Extract and parse condition expression
+	condition := strings.TrimSpace(match[1])
 
-	// Construct the Go code for "else if" statement
-	goLog := fmt.Sprintf("else if %s %s %s", match[1], operator, strings.TrimSuffix(valueTransform(match[3]), ":"))
+	// Handle logical operators
+	condition = strings.ReplaceAll(condition, "lan", "&&")
+	condition = strings.ReplaceAll(condition, "utawi", "||")
+
+	// Handle comparisons and transform condition parts
+	parts := regexp.MustCompile(`([a-zA-Z0-9_]+) (ne|ne sing|gedenan ken|cenikan ken) ([^\s]+)`)
+	condition = parts.ReplaceAllStringFunc(condition, func(part string) string {
+		matches := parts.FindStringSubmatch(part)
+		if matches == nil {
+			return part
+		}
+		varName, comparator, value := matches[1], matches[2], matches[3]
+		operator := mapComparable[comparator]
+		return fmt.Sprintf("%s %s %s", varName, operator, valueTransform(value))
+	})
+
+	// Construct the Go else if condition
+	goLog := fmt.Sprintf("else if %s", condition)
 
 	return &CompilerCommand{
 		Syntax:     goLog,

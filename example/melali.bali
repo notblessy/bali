@@ -1,11 +1,18 @@
 margiang utama
 
-teges tetujon ne "batur"
+anggen "os"
 
-yen tetujon ne "pasih":
-  pesuang("gas ke canggu mai")
-tiosan yen tetujon ne "batur":
-  pesuang("kle joh sajan")
+teges umah ne os.Kruna[1]
+teges tetujon ne os.Kruna[2]
+
+yen umah ne "dalung" lan tetujon ne "canggu":
+  pesuang("pih paek to, tp macet puk!")
+tiosan yen umah ne "dalung" lan tetujon ne "batur":
+  pesuang("kle joh sajan!")
+tiosan yen umah ne "ubud" lan tetujon ne "batur":
+  pesuang("nah sing sanget joh sih...")
+tiosan yen umah ne "dalung" lan tetujon ne "kuta":
+  pesuang("mebalih sangset ditu!")
 tiosan:
-  pesuang("nah jumah gen be")
-suud
+  pesuang("sing be nawang, oyongang ibe jumah!")
+suud:
