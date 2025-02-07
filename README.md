@@ -38,11 +38,7 @@ $ bali run ./example.bali
 
 ## Contributing
 
-Contributions are welcome! Feel free to fork the project, submit issues, and make pull requests. Let’s build this together!
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Contributions are welcome! submit issues, or make pull requests. Let’s build this together!
 
 ## Acknowledgments
 
