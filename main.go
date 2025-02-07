@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -10,7 +11,18 @@ import (
 	"github.com/notblessy/bali/compiler"
 )
 
+const baliVersion = "0.0.3"
+
 func main() {
+	versionFlag := flag.Bool("version", false, "Print the Bali language version")
+
+	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("Basa Bali Version: %s\n", baliVersion)
+		os.Exit(0)
+	}
+
 	if len(os.Args) < 3 {
 		fmt.Println("Usage: go run main.go [run|build] <filename>")
 		os.Exit(1)
