@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+
+	"github.com/notblessy/bali/anggenan"
 )
 
 func NewEntry() string {
@@ -26,6 +28,26 @@ func Entry(msg string) *CompilerCommand {
 	}
 }
 
+func Import(msg string) *CompilerCommand {
+	msg = strings.TrimSpace(msg)
+
+	// Regex to match `anggen "package_name"`
+	format := `^anggen\s+"([^"]+)"$`
+	re := regexp.MustCompile(format)
+	match := re.FindStringSubmatch(msg)
+
+	if match == nil {
+		return nil
+	}
+
+	packageName := match[1]
+
+	return &CompilerCommand{
+		Syntax:      fmt.Sprintf("\"%s\"", packageName),
+		IsImporting: true,
+	}
+}
+
 // Var parses the input and returns the corresponding CompilerCommand
 func Var(msg string) *CompilerCommand {
 	// Define the pattern to match the input format
@@ -40,11 +62,18 @@ func Var(msg string) *CompilerCommand {
 	varName := match[1]
 	value := match[2]
 
-	// Transform the value if necessary
-	transformedValue := valueTransform(value)
+	var syntaxValue string
+
+	pkgName, identifier, bracketValue, isPackageUsage := getPotentialPackageUsage(value)
+	if isPackageUsage {
+		syntaxValue = fmt.Sprintf("%s.%s%s", pkgName, anggenan.PackageInterpreter[pkgName][identifier], bracketValue)
+	} else {
+		// Transform the value if necessary
+		syntaxValue = valueTransform(value)
+	}
 
 	// Create the assignment expression
-	syntax := fmt.Sprintf("var %s = %s", varName, transformedValue)
+	syntax := fmt.Sprintf("var %s = %s", varName, syntaxValue)
 
 	// Return the result in a CompilerCommand struct
 	return &CompilerCommand{
@@ -160,12 +189,13 @@ func Print(msg string) *CompilerCommand {
 		return nil
 	}
 
-	// Construct Go print statement using fmt.Println for correct output
-	goLog := fmt.Sprintf(`print%s`, match[1])
+	// Construct Go print statement using print for correct output
+	goLog := fmt.Sprintf(`fmt.Println%s`, match[1])
 
 	// Return the compiled command
 	return &CompilerCommand{
-		Syntax: goLog,
+		Syntax:     goLog,
+		IsPrinting: true,
 	}
 }
 
@@ -181,7 +211,7 @@ func ReturnEmpty(msg string) *CompilerCommand {
 	goCmd := "return"
 
 	return &CompilerCommand{
-		Syntax:    goCmd,
-		Returning: true,
+		Syntax:      goCmd,
+		IsReturning: true,
 	}
 }

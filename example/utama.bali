@@ -1,14 +1,16 @@
 margiang utama
 
-teges nomor ne 2
+anggen "os"
 
-yen nomor ne 1:
+teges nomor ne os.Kruna[1]
+
+yen nomor ne "1":
   pesuang("Nomor: ", nomor, " mawasta I Putu")
-tiosan yen nomor ne 2:
+tiosan yen nomor ne "2":
   pesuang("Nomor: ", nomor, " mawasta I Made")
-tiosan yen nomor ne 3:
+tiosan yen nomor ne "3":
   pesuang("Nomor: ", nomor, " mawasta I Nyoman")
-tiosan yen nomor ne 4:
+tiosan yen nomor ne "4":
   pesuang("Nomor: ", nomor, " mawasta I Ketut")
 tiosan:
   pesuang("pokokne ulang nomor uling 1")

@@ -47,7 +47,7 @@ func main() {
 
 	switch command {
 	case "run":
-		cmd := exec.Command("go", "run", tempFile)
+		cmd := exec.Command("go", append([]string{"run", tempFile}, os.Args[3:]...)...)
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err := cmd.Run()
