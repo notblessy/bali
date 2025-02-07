@@ -10,6 +10,16 @@ Welcome to the **Bali Programming Language**! This project aims to develop a pro
 - **Cultural Integration:** Keywords and commands are inspired by the Balinese language, celebrating local culture.
 - **Example Programs:** Check out the `example` folder to see Bali in action with sample programs!
 
+## Installation
+
+You can copy this & execute in terminal.
+
+- If you're using bash, change the zsh first.
+
+```zsh
+$ zsh <(curl -s -L https://raw.githubusercontent.com/notblessy/bali-installer/refs/heads/main/install.sh)
+```
+
 ## Usage
 
 You can write your own Bali programs! Here’s a simple “Hello, World!” example:
