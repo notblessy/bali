@@ -3,13 +3,13 @@ package compiler
 import "fmt"
 
 func GetCompilerCommand(lines []string) []CompilerCommand {
-	commands := []func(string) *CompilerCommand{
+	commands := []func(string) CompilerCommand{
 		Entry,
 		Import,
 		Var,
 		If,
 		Else,
-		CloseIf,
+		CloseStatement,
 		Print,
 		ReturnEmpty,
 	}
@@ -19,7 +19,7 @@ func GetCompilerCommand(lines []string) []CompilerCommand {
 	for _, line := range lines {
 		for _, command := range commands {
 			if c := command(line); c != nil {
-				compilerCommands = append(compilerCommands, *c)
+				compilerCommands = append(compilerCommands, c)
 			}
 		}
 	}
@@ -33,7 +33,7 @@ func ToGolang(commands []CompilerCommand) string {
 
 	isPrinting := func() bool {
 		for _, cmd := range commands {
-			if cmd.IsPrinting {
+			if cmd.IsPrinting() {
 				return true
 			}
 		}
@@ -42,31 +42,31 @@ func ToGolang(commands []CompilerCommand) string {
 	}
 
 	for _, cmd := range commands {
-		currSyntax := cmd.Syntax
+		currSyntax := cmd.Syntax()
 
-		if cmd.IsImporting {
+		if cmd.IsImporting() {
 			continue
 		}
 
-		if cmd.Entry {
+		if cmd.IsEntry() {
 			for i, importcmd := range commands {
 				if i == 0 {
 					continue
 				}
 
-				if !commands[i-1].IsImporting && !importcmd.IsImporting {
+				if !commands[i-1].IsImporting() && !importcmd.IsImporting() {
 					continue
 				}
 
-				if !commands[i-1].IsImporting && importcmd.IsImporting {
-					currSyntax = currSyntax + "\nimport (\n" + importcmd.Syntax
+				if !commands[i-1].IsImporting() && importcmd.IsImporting() {
+					currSyntax = currSyntax + "\nimport (\n" + importcmd.Syntax()
 				}
 
-				if commands[i-1].IsImporting && importcmd.IsImporting {
-					currSyntax = currSyntax + "\n" + importcmd.Syntax
+				if commands[i-1].IsImporting() && importcmd.IsImporting() {
+					currSyntax = currSyntax + "\n" + importcmd.Syntax()
 				}
 
-				if commands[i-1].IsImporting && !importcmd.IsImporting {
+				if commands[i-1].IsImporting() && !importcmd.IsImporting() {
 					if isPrinting() {
 						currSyntax = currSyntax + "\n" + "\"fmt\""
 					}
@@ -79,17 +79,17 @@ func ToGolang(commands []CompilerCommand) string {
 			hasEntry = true
 		}
 
-		if cmd.CloseGroup {
+		if cmd.IsCloseGroup() {
 			currSyntax = "} " + currSyntax
 			isOpenGroup = false
 		}
 
-		if cmd.OpenGroup {
+		if cmd.IsOpenGroup() {
 			currSyntax = currSyntax + " {"
 			isOpenGroup = true
 		}
 
-		if cmd.IsReturning {
+		if cmd.IsReturning() {
 			currSyntax = fmt.Sprintf("%s\n}", currSyntax)
 		}
 

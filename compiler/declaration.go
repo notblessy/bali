@@ -8,11 +8,13 @@ import (
 	"github.com/notblessy/bali/anggenan"
 )
 
+// NewEntry :nodoc:
 func NewEntry() string {
 	return "func main() {\n"
 }
 
-func Entry(msg string) *CompilerCommand {
+// Entry parses the input string and returns a Go entry point
+func Entry(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
 	format := `margiang utama`
@@ -22,16 +24,16 @@ func Entry(msg string) *CompilerCommand {
 		return nil
 	}
 
-	return &CompilerCommand{
-		Syntax: "package main",
-		Entry:  true,
-	}
+	cmd := NewCommand("package main")
+	cmd.Toggle("entry", true)
+
+	return cmd
 }
 
-func Import(msg string) *CompilerCommand {
+// Import parses the input string and returns a Go import statement
+func Import(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
-	// Regex to match `anggen "package_name"`
 	format := `^anggen\s+"([^"]+)"$`
 	re := regexp.MustCompile(format)
 	match := re.FindStringSubmatch(msg)
@@ -42,23 +44,22 @@ func Import(msg string) *CompilerCommand {
 
 	packageName := match[1]
 
-	return &CompilerCommand{
-		Syntax:      fmt.Sprintf("\"%s\"", packageName),
-		IsImporting: true,
-	}
+	cmd := NewCommand(fmt.Sprintf("\"%s\"", packageName))
+	cmd.Toggle("importing", true)
+
+	return cmd
 }
 
 // Var parses the input and returns the corresponding CompilerCommand
-func Var(msg string) *CompilerCommand {
-	// Define the pattern to match the input format
+func Var(msg string) CompilerCommand {
 	format := `teges ([a-zA-Z_]+[a-zA-Z0-9_]*) ne (.+)`
+
 	re := regexp.MustCompile(format)
 	match := re.FindStringSubmatch(msg)
 	if match == nil {
-		return nil // Return nil if the format doesn't match
+		return nil
 	}
 
-	// Extract variable name and value
 	varName := match[1]
 	value := match[2]
 
@@ -68,21 +69,14 @@ func Var(msg string) *CompilerCommand {
 	if isPackageUsage {
 		syntaxValue = fmt.Sprintf("%s.%s%s", pkgName, anggenan.PackageInterpreter[pkgName][identifier], bracketValue)
 	} else {
-		// Transform the value if necessary
 		syntaxValue = valueTransform(value)
 	}
 
-	// Create the assignment expression
-	syntax := fmt.Sprintf("var %s = %s", varName, syntaxValue)
-
-	// Return the result in a CompilerCommand struct
-	return &CompilerCommand{
-		Syntax: syntax,
-	}
+	return NewCommand(fmt.Sprintf("var %s = %s", varName, syntaxValue))
 }
 
 // If parses the input string and returns a Go if condition
-func If(msg string) *CompilerCommand {
+func If(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
 	if strings.HasPrefix(msg, "tiosan") {
@@ -95,14 +89,11 @@ func If(msg string) *CompilerCommand {
 		return nil
 	}
 
-	// Extract and parse condition expression
 	condition := strings.TrimSpace(match[1])
 
-	// Handle logical operators
 	condition = strings.ReplaceAll(condition, "lan", "&&")
 	condition = strings.ReplaceAll(condition, "utawi", "||")
 
-	// Transform each part of the condition if needed
 	parts := regexp.MustCompile(`([a-zA-Z0-9_]+) (ne|ne sing|gedenan ken|cenikan ken) ([^\s]+)`)
 	condition = parts.ReplaceAllStringFunc(condition, func(part string) string {
 		matches := parts.FindStringSubmatch(part)
@@ -114,35 +105,29 @@ func If(msg string) *CompilerCommand {
 		return fmt.Sprintf("%s %s %s", varName, operator, valueTransform(value))
 	})
 
-	// Construct the Go if condition
 	goIf := fmt.Sprintf("if %s", condition)
 
-	return &CompilerCommand{
-		Syntax:    goIf,
-		OpenGroup: true,
-	}
+	cmd := NewCommand(goIf)
+	cmd.Toggle("opengroup", true)
+
+	return cmd
 }
 
 // ElseIf parses the input string and returns a Go else if condition
-func ElseIf(msg string) *CompilerCommand {
-	// Trim any leading or trailing spaces
+func ElseIf(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
-	// Adjusting the format to capture the phrase "tiosan yen"
 	format := regexp.MustCompile(`tiosan yen ([^:]+):`)
 	match := format.FindStringSubmatch(msg)
 	if match == nil {
 		return nil
 	}
 
-	// Extract and parse condition expression
 	condition := strings.TrimSpace(match[1])
 
-	// Handle logical operators
 	condition = strings.ReplaceAll(condition, "lan", "&&")
 	condition = strings.ReplaceAll(condition, "utawi", "||")
 
-	// Handle comparisons and transform condition parts
 	parts := regexp.MustCompile(`([a-zA-Z0-9_]+) (ne|ne sing|gedenan ken|cenikan ken) ([^\s]+)`)
 	condition = parts.ReplaceAllStringFunc(condition, func(part string) string {
 		matches := parts.FindStringSubmatch(part)
@@ -154,22 +139,18 @@ func ElseIf(msg string) *CompilerCommand {
 		return fmt.Sprintf("%s %s %s", varName, operator, valueTransform(value))
 	})
 
-	// Construct the Go else if condition
 	goLog := fmt.Sprintf("else if %s", condition)
+	cmd := NewCommand(goLog)
+	cmd.Toggle("opengroup", true)
+	cmd.Toggle("closegroup", true)
 
-	return &CompilerCommand{
-		Syntax:     goLog,
-		OpenGroup:  true,
-		CloseGroup: true,
-	}
+	return cmd
 }
 
 // Else parses the input string and returns a Go if condition
-func Else(msg string) *CompilerCommand {
-	// Trim any leading or trailing spaces
+func Else(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
-	// Define the regular expression pattern to match the input string "tiosan"
 	format := `tiosan:`
 	re := regexp.MustCompile(format)
 	match := re.FindStringSubmatch(msg)
@@ -178,16 +159,17 @@ func Else(msg string) *CompilerCommand {
 		return nil
 	}
 
-	return &CompilerCommand{
-		Syntax:     "else",
-		OpenGroup:  true,
-		CloseGroup: true,
-	}
+	cmd := NewCommand("else")
+	cmd.Toggle("opengroup", true)
+	cmd.Toggle("closegroup", true)
+
+	return cmd
 }
 
-func CloseIf(msg string) *CompilerCommand {
-	// Define the regular expression pattern to match the input string "suud"
+// CloseStatement parses the input string and returns a Go closing statement
+func CloseStatement(msg string) CompilerCommand {
 	format := `suud$`
+
 	re := regexp.MustCompile(format)
 	match := re.FindStringSubmatch(msg)
 
@@ -195,34 +177,32 @@ func CloseIf(msg string) *CompilerCommand {
 		return nil
 	}
 
-	return &CompilerCommand{
-		Syntax:     "",
-		CloseGroup: true,
-	}
+	cmd := NewCommand("")
+	cmd.Toggle("closegroup", true)
+
+	return cmd
 }
 
-func Print(msg string) *CompilerCommand {
-	// Trim any leading or trailing spaces
+// Print parses the input string and returns a Go print statement
+func Print(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
-	// Define the format pattern to match "pesuang <message>"
 	format := regexp.MustCompile(`pesuang(.*)`)
 	match := format.FindStringSubmatch(msg)
 	if match == nil {
 		return nil
 	}
 
-	// Construct Go print statement using print for correct output
 	goLog := fmt.Sprintf(`fmt.Println%s`, match[1])
 
-	// Return the compiled command
-	return &CompilerCommand{
-		Syntax:     goLog,
-		IsPrinting: true,
-	}
+	cmd := NewCommand(goLog)
+	cmd.Toggle("printing", true)
+
+	return cmd
 }
 
-func ReturnEmpty(msg string) *CompilerCommand {
+// ReturnEmpty parses the input string and returns a Go return statement
+func ReturnEmpty(msg string) CompilerCommand {
 	msg = strings.TrimSpace(msg)
 
 	format := regexp.MustCompile(`uliang$`)
@@ -233,8 +213,8 @@ func ReturnEmpty(msg string) *CompilerCommand {
 
 	goCmd := "return"
 
-	return &CompilerCommand{
-		Syntax:      goCmd,
-		IsReturning: true,
-	}
+	cmd := NewCommand(goCmd)
+	cmd.Toggle("returning", true)
+
+	return cmd
 }

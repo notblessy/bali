@@ -13,16 +13,6 @@ var mapComparable = map[string]string{
 	"utawi":       "||",
 }
 
-type CompilerCommand struct {
-	Syntax      string
-	OpenGroup   bool
-	CloseGroup  bool
-	Entry       bool
-	IsReturning bool
-	IsImporting bool
-	IsPrinting  bool
-}
-
 // valueTransform simulates value transformation (e.g., removing quotes for strings)
 func valueTransform(value string) string {
 	return value

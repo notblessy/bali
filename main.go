@@ -24,24 +24,25 @@ func main() {
 	}
 
 	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run main.go [run|build] <filename>")
+		fmt.Println("USAGE: go run main.go [run|build] <filename>")
 		os.Exit(1)
 	}
 
-	command := os.Args[1] // "run" or "build"
+	// accepts "run" or "build" command
+	command := os.Args[1]
 	filename := os.Args[2]
 
-	tempDir := ".tempbuilds"
+	tempDir := filepath.Join(os.Getenv("HOME"), ".local", "bin", "tempbuilds")
 	err := os.MkdirAll(tempDir, 0755)
 	if err != nil {
-		fmt.Println("Error creating temp directory:", err)
+		fmt.Println("[DIR] Error creating temp directory:", err)
 		os.Exit(1)
 	}
 
 	// Read the file
 	content, err := os.ReadFile(filename)
 	if err != nil {
-		fmt.Println("Error reading file:", err)
+		fmt.Println("[DIR] Error reading file:", err)
 		os.Exit(1)
 	}
 
@@ -51,11 +52,11 @@ func main() {
 	tempFile := filepath.Join(tempDir, "output.go")
 	err = os.WriteFile(tempFile, []byte(output), 0644)
 	if err != nil {
-		fmt.Println("Error writing temp Go file:", err)
+		fmt.Println("[DIR] Error writing temp Go file:", err)
 		os.Exit(1)
 	}
 
-	defer cleanup()
+	defer cleanup(tempDir)
 
 	switch command {
 	case "run":
@@ -105,8 +106,7 @@ func extract(input string) []compiler.CompilerCommand {
 	return cmds
 }
 
-func cleanup() {
-	tempDir := ".tempbuilds"
+func cleanup(tempDir string) {
 	err := os.RemoveAll(tempDir)
 	if err != nil {
 		fmt.Println("Warning: Failed to delete temp files:", err)
