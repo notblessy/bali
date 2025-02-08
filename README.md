@@ -6,10 +6,18 @@ Welcome to the **Bali Programming Language**! This project aims to develop a pro
 
 ## Features
 
-- **Simple Syntax:** Bali emphasizes readability and simplicity, making it a great choice for beginners.
-- **Cultural Integration:** Keywords and commands are inspired by the Balinese language, celebrating local culture.
-- **Example Programs:** Check out the `example` folder to see Bali in action with sample programs!
-
+- [x] Compiler built with golang
+- [x] Run or Build xx.bali to binary
+- [x] Parse command line arguments
+- [x] Variable declaration
+- [x] Conditional statements
+- [x] Print code
+- [x] Variable declaration
+- [ ] Dict & array
+- [ ] Iterate dict or array
+- [ ] Syntax highlighter & auto indent [vscode]
+- [ ] Code snippet [vscode]
+      
 ## Installation
 
 You can copy this & execute in terminal.
